@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+// root path for go package after it is generated
+option go_package="./proto";
+
+service CalculatorService {
+  rpc Sum(SumRequest) returns (SumResponse);
+  rpc Primes(PrimesRequest) returns (stream PrimesResponse);
+  rpc Avg(stream AvgRequest) returns (AvgResponse);
+  rpc Max(stream MaxRequest) returns (stream MaxResponse);
+}
+
+message MaxRequest{
+  float number = 1;
+}
+
+message MaxResponse{
+  float result = 1;
+}
+
+message AvgRequest {
+  int32 number = 1;
+}
+
+message AvgResponse {
+  float result = 1;
+}
+
+
+message PrimesRequest {
+  int32 number = 1;
+}
+
+message PrimesResponse {
+  int32 result = 1;
+}
+
+message SumRequest {
+  int32 first = 1;
+  int32 second = 2;
+}
+
+message SumResponse{
+  int32 result = 1;
+}
