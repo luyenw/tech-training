@@ -64,3 +64,44 @@ func (srv RpcService) Avg(ch chan int32, ctx context.Context) (float32, error) {
 	}
 	return recv.GetResult(), nil
 }
+
+func (srv RpcService) Max(in chan float32, ctx context.Context) (<-chan float32, error) {
+	c := config.GetRpcClient()
+	out := make(chan float32)
+	maxClient, err := c.Max(ctx)
+	if err != nil {
+		return out, err
+	}
+	opened := true
+	var n float32
+	go func() {
+		for opened {
+			var err error
+			n, opened = <-in
+			if opened {
+				err = maxClient.Send(&proto.MaxRequest{Number: n})
+			}
+			if err != nil {
+				log.Fatalf(err.Error())
+				return
+			}
+		}
+		err := maxClient.CloseSend()
+		if err != nil {
+			return
+		}
+	}()
+	go func() {
+		for {
+			recv, err := maxClient.Recv()
+			if err == io.EOF {
+				close(out)
+			}
+			if err != nil {
+				return
+			}
+			out <- recv.GetResult()
+		}
+	}()
+	return out, nil
+}

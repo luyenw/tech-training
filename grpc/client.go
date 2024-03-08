@@ -4,9 +4,6 @@ import (
 	"context"
 	"fmt"
 	"grpc/client"
-	"grpc/config"
-	"grpc/proto"
-	"io"
 	"log"
 	"time"
 )
@@ -58,39 +55,23 @@ func main() {
 
 	// bi-directional streaming
 	log.Println("bi-directional streaming")
-	c := config.GetRpcClient()
-	maxClient, err := c.Max(context.Background())
-	if err != nil {
-		return
-	}
-	ch2 := make(chan int)
+	in := make(chan float32)
 	go func() {
-		li := [6]float32{1, 5, 3, 6, 2, 20}
-		for i := 0; i < len(li); i++ {
-			fmt.Printf("sent: %.1f\n", li[i])
+		li := []float32{1, 5, 3, 6, 2, 20}
+		for _, i := range li {
 			time.Sleep(1 * time.Second)
-			err := maxClient.Send(&proto.MaxRequest{Number: li[i]})
-			if err != nil {
-				log.Fatalf(err.Error())
-				return
-			}
+			in <- i
+			fmt.Printf("sent: %.1f\n", i)
 		}
-		err := maxClient.CloseSend()
-		if err != nil {
-			return
-		}
+		close(in)
 	}()
-	go func() {
-		for {
-			recv, err := maxClient.Recv()
-			if err == io.EOF {
-				ch2 <- 1
-			}
-			if err != nil {
-				return
-			}
-			fmt.Printf("received: %.1f\n", recv.GetResult())
+	out, err := srv.Max(in, context.Background())
+	opened = true
+	var re float32
+	for opened {
+		re, opened = <-out
+		if opened {
+			fmt.Printf("received: %.1f\n", re)
 		}
-	}()
-	<-ch2
+	}
 }
