@@ -1,77 +1,476 @@
-openapi: 3.0.3
+openapi: 3.0.1
 info:
-  title: FinanceAPP
-  description: FinanceAPP
-  version: 2022-04-01
+  title: "Reqres API Specification"
+  version: 0.0.1
 servers:
-  - url: 'http://localhost:9090/v1'
-    description: 'Local'
+  - url: "https://reqres.in/api"
+tags:
+  - name: User
+  - name: Resource
+  - name: Auth
 paths:
-  /signup:
-    summary: Signup for users to get account
-    description:  User account signup
-    post:
-      summary: A POST request to sign up for an account
-      security: []
-      operationId: signUp
+  /users:
+    get:
       tags:
-        - Signup
-      description: sign up post
+        - User
+      summary: LIST USERS
+      description: Return a list of users
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            example: 1
+        - name: delay
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            example: 3
+      responses:
+        "200":
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                  per_page:
+                    type: integer
+                  total:
+                    type: integer
+                  totol_pages:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        email:
+                          type: string
+                        first_name:
+                          type: string
+                        last_name:
+                          type: string
+                        avatar:
+                          type: string
+                  support:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                      text:
+                        type: string
+              example:
+                page: 2
+                per_page: 6
+                total: 12
+                total_pages: 2
+                data:
+                  - id: 7
+                    email: michael.lawson@reqres.in
+                    first_name: Michael
+                    last_name: Lawson
+                    avatar: https://reqres.in/img/faces/7-image.jpg
+                  - id: 8
+                    email: lindsay.ferguson@reqres.in
+                    first_name: Lindsay
+                    last_name: Ferguson
+                    avatar: https://reqres.in/img/faces/8-image.jpg
+                  - id: 9
+                    email: tobias.funke@reqres.in
+                    first_name: Tobias
+                    last_name: Funke
+                    avatar: https://reqres.in/img/faces/9-image.jpg
+                  - id: 10
+                    email: byron.fields@reqres.in
+                    first_name: Byron
+                    last_name: Fields
+                    avatar: https://reqres.in/img/faces/10-image.jpg
+                  - id: 11
+                    email: george.edwards@reqres.in
+                    first_name: George
+                    last_name: Edwards
+                    avatar: https://reqres.in/img/faces/11-image.jpg
+                  - id: 12
+                    email: rachel.howell@reqres.in
+                    first_name: Rachel
+                    last_name: Howell
+                    avatar: https://reqres.in/img/faces/12-image.jpg
+                support:
+                  url: https://reqres.in/#support-heading
+                  text: To keep ReqRes free, contributions towards server costs are appreciated!
+    post:
+      tags:
+        - User
+      summary: CREATE USER
+      # description:
       requestBody:
-        description: signup request object
-        required: true
         content:
           application/json:
             schema:
               type: object
               properties:
                 name:
-                  description: full user name
                   type: string
-                  example: john doe
-                email:
+                job:
                   type: string
-                  description: valid email
-                  example: john.doe@example.com
-                password:
-                  type: string
-                  description: strong password
-                  example: secureP@ssword
-                  minLength: 6
-                  maxLength: 16
-                confirm_password:
-                  type: string
-                  example: secureP@ssword
-                  minLength: 6
-                  maxLength: 16
-              required:
-                - name
-                - password
-                - email
-                - confirm_password
+            example:
+              name: morpheus
+              job: leader
       responses:
-        '200':
-          description: succesfully signed up
+        "201":
+          description: Return the user has created
           content:
             application/json:
               schema:
+                type: object
                 properties:
                   name:
                     type: string
-                    example: Joe doe
-                  email:
+                  job:
                     type: string
-                    example: john.doe@example.com
-        default:
-          description: error
+                  id:
+                    type: string
+                  createdAt:
+                    type: string
+              example:
+                name: morpheus
+                job: leader
+                id: '597'
+                createdAt: '2024-03-12T03:51:44.250Z'
+    put:
+      tags:
+        - User
+      summary: UPDATE USER
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                job:
+                  type: string
+            example:
+              name: "morpheus"
+              job: "zion president"
+      responses:
+        "200":
+          description: "update successful"
           content:
             application/json:
               schema:
+                type: object
                 properties:
-                  message:
+                  name:
                     type: string
+                  job:
+                    type: string
+                  updatedAt:
+                    type: string
+              example:
+                name: "morpheus"
+                job: "zion resident"
+                updatedAt: "2024-03-12T03:44:58.058Z"
+    patch:
+      tags:
+        - User
+      summary: UPDATE ON PROVIDED FIELDS
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                job:
+                  type: string
+            example:
+              name: "morpheus"
+              job: "zion president"
+      responses:
+        "200":
+          description: "update successful"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  job:
+                    type: string
+                  updatedAt:
+                    type: string
+              example:
+                name: "morpheus"
+                job: "zion resident"
+                updatedAt: "2024-03-12T03:44:58.058Z"
+  /users/{userId}:
+    get:
+      tags:
+        - User
+      summary: SINGLE USER
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 2
+      responses:
+        "200":
+          description: Return an user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      email:
+                        type: string
+                      first_name:
+                        type: string
+                      last_name:
+                        type: string
+                      avatar:
+                        type: string
+                  support:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                      text:
+                        type: string
+              example:
+                data:
+                  id: 2
+                  email: janet.weaver@reqres.in
+                  first_name: Janet
+                  last_name: Weaver
+                  avatar: https://reqres.in/img/faces/2-image.jpg
+                support:
+                  url: https://reqres.in/#support-heading
+                  text: To keep ReqRes free, contributions towards server costs are appreciated!
+        "404":
+          description: single user not found
+          content:
+            application/json:
+              schema:
+                type: object
+  /unknown:
+    get:
+      tags:
+        - Resource
+      summary: LIST <RESOURCE>
+      responses:
+        "200":
+          description: A list of resources
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                  per_page:
+                    type: integer
+                  total:
+                    type: integer
+                  totol_pages:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        year:
+                          type: integer
+                        color:
+                          type: string
+                        pantone_value:
+                          type: string
+                  support:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                      text:
+                        type: string
+              example:
+                page: 1
+                per_page: 6
+                total: 12
+                total_pages: 2
+                data:
+                  - id: 1
+                    name: cerulean
+                    year: 2000
+                    color: '#98B2D1'
+                    pantone_value: 15-4020
+                support:
+                  url: https://reqres.in/#support-heading
+                  text: To keep ReqRes free, contributions towards server costs are appreciated!
+        "404":
+          description: single resource not found
+          content:
+            application/json:
+              schema:
+                type: object
+  /unknown/{resourceId}:
+    get:
+      tags:
+        - Resource
+      summary: SINGLE RESOURCE
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 0
+      responses:
+        "200":
+          description: Return a resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      year:
+                        type: integer
+                      color:
+                        type: string
+                      pantone_value:
+                        type: string
+                  support:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                      text:
+                        type: string
+              example:
+                data:
+                  id: 2
+                  name: fuchsia rose
+                  year: 2001
+                  color: '#C74375'
+                  pantone_value: 17-2031
+                support:
+                  url: https://reqres.in/#support-heading
+                  text: To keep ReqRes free, contributions towards server costs are appreciated!
+        "404":
+          description: single resource not found
+          content:
+            application/json:
+              schema:
+                type: object
+  /register:
+    post:
+      tags:
+        - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+            example:
+              email: eve.holt@reqres.in
+              password: pistol
+      responses:
+        "200":
+          description: "register successful"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  token:
+                    type: string
+              example:
+                id: 4
+                token: QpwL5tke4Pnpja7X4
+        "400":
+          description: "missing password"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
                   error:
                     type: string
-tags:
-  - name: Signup
-    description: signup description
+              example:
+                error: "Missing password"
+  /login:
+    post:
+      tags:
+        - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+            example:
+              email: "eve.holt@reqres.in"
+              password: "cityslicka"
+      responses:
+        "200":
+          description: "login successful"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+              example:
+                example: "QpwL5tke4Pnpja7X4"
+        "400":
+          description: "missing password"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "missing password"
