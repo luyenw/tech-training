@@ -9,8 +9,7 @@ import (
 
 var (
 	instance   *redis.Client
-	err        error
-	once       sync.Once
+	mu         sync.Mutex
 	REDIS_HOST = os.Getenv("REDIS_HOST")
 	REDIS_PWD  = os.Getenv("REDIS_PWD")
 )
@@ -25,10 +24,10 @@ func getRedis() *redis.Client {
 }
 
 func GetRedis() *redis.Client {
+	mu.Lock()
+	defer mu.Unlock()
 	if instance == nil {
-		once.Do(func() {
-			instance = getRedis()
-		})
+		instance = getRedis()
 	}
 	return instance
 }

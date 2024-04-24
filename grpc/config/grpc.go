@@ -13,9 +13,9 @@ var (
 )
 
 func GetRpcClient() proto.CalculatorServiceClient {
+	mu.Lock()
+	defer mu.Unlock()
 	if client == nil {
-		mu.Lock()
-		defer mu.Unlock()
 		cc, err := grpc.Dial("localhost:50069", grpc.WithInsecure())
 		if err != nil {
 			log.Fatalf(err.Error())

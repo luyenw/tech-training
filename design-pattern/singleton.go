@@ -16,10 +16,10 @@ var (
 )
 
 func getInstance() *Object {
+	mu.Lock()
+	defer mu.Unlock()
 	if object == nil {
-		mu.Lock()
 		object = &Object{createdAt: time.Now().String()}
-		defer mu.Unlock()
 	}
 	return object
 }

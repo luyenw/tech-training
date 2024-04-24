@@ -35,9 +35,9 @@ func initES() *elasticsearch.Client {
 	return es
 }
 func GetES() *elasticsearch.Client {
+	mutex.Lock()
+	defer mutex.Unlock()
 	if instance == nil {
-		mutex.Lock()
-		defer mutex.Unlock()
 		instance = initES()
 		fmt.Println(time.Now())
 	}
