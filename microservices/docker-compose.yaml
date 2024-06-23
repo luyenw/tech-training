@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v2.10
+    command:
+      - "--api.insecure=true" 
+      - "--providers.docker=true"
+      - "--providers.docker.swarmMode=true"
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.websecure.address=:443"
+      - "--certificatesResolvers.myresolver.acme.httpChallenge.entryPoint=web"
+      - "--certificatesResolvers.myresolver.acme.storage=/letsencrypt/acme.json" 
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "traefik-certificates:/letsencrypt"
+    networks:
+      - traefik-public
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.traefik.rule=Host(`traefik.localhost`)"
+        - "traefik.http.routers.traefik.service=api@internal"
+        - "traefik.http.routers.traefik.entrypoints=web,websecure" # Sử dụng cả HTTP và HTTPS
+
+  web:
+    image: ichte/swarmtest:node
+    networks:
+      - traefik-public
+    deploy:
+      replicas: 5
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.web.rule=PathPrefix(`/web`)" 
+        - "traefik.http.services.web.loadbalancer.server.port=8085" 
+        - "traefik.http.routers.web.entrypoints=web,websecure" 
+        - "traefik.http.middlewares.web-redirect.redirectscheme.scheme=https" 
+        - "traefik.http.routers.web-secure.rule=PathPrefix(`/web`)"
+        - "traefik.http.routers.web-secure.entrypoints=websecure" 
+        - "traefik.http.routers.web-secure.tls.certresolver=myresolver"
+
+networks:
+  traefik-public:
+    external: true
+
+volumes:
+  traefik-certificates:
